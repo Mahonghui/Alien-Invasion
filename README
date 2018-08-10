@@ -1,0 +1,12 @@
+Python Crash Course ==> project 1: Alien Invasion
+
+# Hierachy
+alien_invasion.py	: initialization, entrance file to run this game by calling 'run()' function
+game_function.py	: define elements(ship, bullets, aliens) operation functions
+alien.py			: Alien class definition
+bullet.py			: Bullet class definition
+ship.py				: Ship class definition
+button.py			: Button class definition, mainly for 'Play' button right now
+game_stats.py		: Stat class definiton, recording ship_limit, scores and high_score
+scoreboard.py		: ScoreBoard class definition, displaying instant score while playing
+setting.py			: Setting class definition, configuring elements properties
