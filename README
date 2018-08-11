@@ -10,5 +10,4 @@ button.py			: Button class definition, mainly for 'Play' button right now
 game_stats.py		: Stat class definiton, recording ship_limit, scores and high_score
 scoreboard.py		: ScoreBoard class definition, displaying instant score while playing
 setting.py			: Setting class definition, configuring elements properties
-
 ------------------------------------------------------------------------------------------------

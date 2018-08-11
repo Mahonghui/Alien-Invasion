@@ -1,5 +1,5 @@
 import sys
-from time import sleep
+import time
 import pygame
 
 from bullet import Bullet
@@ -53,10 +53,11 @@ def key_down_event(ai_setting, event, ship, screen, bullets):
 	elif event.key == pygame.K_SPACE:
 		fire_bullet(ai_setting, screen, ship, bullets)
 
-def check_events(ai_setting, screen, aliens, ship, bullets, play_button, stats):
+def check_events(ai_setting, screen, aliens, ship, bullets, play_button, stats, sb):
 
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
+		if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
+			store_high_score('./high_score.txt', stats)
 			sys.exit()
 
 		if event.type == pygame.KEYUP:
@@ -65,16 +66,31 @@ def check_events(ai_setting, screen, aliens, ship, bullets, play_button, stats):
 			key_down_event(ai_setting, event, ship, screen, bullets)
 		elif event.type == pygame.MOUSEBUTTONDOWN:
 			mouse_x, mouse_y = pygame.mouse.get_pos()
-			check_play_button(ai_setting, screen, stats, ship, aliens, bullets, play_button, mouse_x, mouse_y)
+			check_play_button(ai_setting, screen, stats, ship, aliens, bullets, play_button, sb, mouse_x, mouse_y)
+
+def store_high_score(filename, stats):
+
+	last_high_score = stats.load_high_score(filename)
+	if stats.high_score > last_high_score:
+		with open('./high_score.txt', 'a+') as f_obj:
+			formated_time = time.strftime('%Y-%m-%d %H:%M ', time.localtime(time.time()))
+			f_obj.write(formated_time + str(stats.high_score)+'\n')
+			f_obj.close()
 
 
-def check_play_button(ai_setting, screen, stats, ship, aliens, bullets, play_button, mouse_x, mouse_y):
+
+def check_play_button(ai_setting, screen, stats, ship, aliens, bullets, play_button, sb, mouse_x, mouse_y):
 
 	button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
 	if button_clicked and not stats.game_active:
 		pygame.mouse.set_visible(False)
 		stats.reset_stats()
 		stats.game_active = True
+
+		sb.prep_score()
+		sb.prep_high_score()
+		sb.prep_level()
+		sb.prep_ships()
 
 		aliens.empty()
 		bullets.empty()
@@ -109,6 +125,8 @@ def check_collision(ai_setting, screen, aliens, bullets, ship, stats, sb):
 	if len(aliens) == 0:
 		bullets.empty()
 		ai_setting.increase_speed()
+		stats.level+=1
+		sb.prep_level()
 		create_fleet(ai_setting, screen, aliens, ship)
 
 
@@ -128,19 +146,21 @@ def update_screen(ai_setting, screen, ship, aliens, bullets, stats, play_button,
 
 
 
-def update_aliens(ai_setting, stats, screen, aliens, ship, bullets):
+def update_aliens(ai_setting, stats, screen, aliens, ship, bullets, sb):
 	check_fleet_edge(ai_setting, aliens)
 	aliens.update()
 
 	if pygame.sprite.spritecollideany(ship, aliens):
-		ship_hit(ai_setting, stats, screen, aliens, ship, bullets)
+		ship_hit(ai_setting, stats, screen, aliens, ship, bullets, sb)
 
-def ship_hit(ai_setting, stats, screen, aliens, ship, bullets):
+def ship_hit(ai_setting, stats, screen, aliens, ship, bullets, sb):
 	if stats.ship_left >0:
-		stats.ship_left -=1
 
+		stats.ship_left -=1
+		sb.prep_ships()
 		aliens.empty()
 		bullets.empty()
+
 
 		create_fleet(ai_setting, screen, aliens, ship)
 		ship.center_ship()
